@@ -6,6 +6,7 @@ const RoomSchema = {
     room_id: {
         type: String,
         required: true,
+        unique: true,
     },
     room_name: {
         type: String,

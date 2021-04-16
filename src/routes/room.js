@@ -56,7 +56,7 @@ router.post("/room-create", validationRules, async (req, res) => {
         return res.status(status.BAD_REQUEST).json({
             success: false,
             message: ERROR_01,
-            data: {},
+            data: { error: e.message },
         })
     }
 })
