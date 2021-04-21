@@ -61,4 +61,55 @@ router.post("/room-create", validationRules, async (req, res) => {
     }
 })
 
+router.post("/room-join", [validationRules[0], validationRules[3]], async (req, res) => {
+    const errors = validator.validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return res.status(status.BAD_REQUEST).json({
+            success: false,
+            message: ERROR_01,
+            data: {
+                errors: errors.array(),
+            },
+        })
+    }
+
+    try {
+        const roomUniqId = req.body["room-unique-id"] || null
+        const roomPassword = req.body["room-password"].length !== 0 ? req.body["room-password"] : null
+
+        const roomFind = await RoomSchema.find({
+            room_id: roomUniqId,
+            room_password: roomPassword,
+        })
+
+        if (roomFind.length > 1) {
+            return res.status(status.OK).json({
+                success: false,
+                message: `${roomUniqId} has a duplicate entry! Not allowed, please create new room instead.`,
+                data: { room_id: roomUniqId },
+            })
+        }
+        if (roomFind.length === 0) {
+            return res.status(status.OK).json({
+                success: false,
+                message: `${roomUniqId} has a password or does not exist! Please create new room instead.`,
+                data: { room_id: roomUniqId },
+            })
+        }
+
+        return res.status(status.OK).json({
+            success: true,
+            message: `${roomUniqId} does exist! Welcome user!`,
+            data: { room_id: roomUniqId },
+        })
+    } catch (e) {
+        return res.status(status.BAD_REQUEST).json({
+            success: false,
+            message: ERROR_01,
+            data: { error: e.message },
+        })
+    }
+})
+
 module.exports = router
