@@ -3,7 +3,7 @@ const validator = require("express-validator")
 const mongoose = require("mongoose")
 const express = require("express")
 const router = express.Router()
-const RoomSchema = require("../mongodb/schema/room")
+const RoomSchema = require("../mongodb/schema/rooms")
 const { ERROR_01 } = require("../_error-messages")
 
 const validationRules = [
