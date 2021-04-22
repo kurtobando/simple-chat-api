@@ -1,5 +1,6 @@
 const status = require("http-status-codes")
 const validator = require("express-validator")
+const bcrypt = require("bcrypt")
 const mongoose = require("mongoose")
 const express = require("express")
 const router = express.Router()
@@ -32,6 +33,7 @@ router.post("/room-create", validationRules, async (req, res) => {
         const roomName = req.body["room-name"] || null
         const roomDescription = req.body["room-description"] || null
         const roomPassword = req.body["room-password"] || null
+        const roomPasswordHash = roomPassword !== null ? await bcrypt.hash(roomPassword, 10) : roomPassword
         const isPublic = req.body["room-enable-password"] || false
 
         const roomCreate = new RoomSchema({
@@ -39,7 +41,7 @@ router.post("/room-create", validationRules, async (req, res) => {
             room_id: roomUniqId,
             room_name: roomName,
             room_description: roomDescription,
-            room_password: roomPassword,
+            room_password: roomPasswordHash,
             is_public: isPublic,
         })
 
@@ -80,7 +82,10 @@ router.post("/room-join", [validationRules[0], validationRules[3]], async (req, 
 
         const roomFind = await RoomSchema.find({
             room_id: roomUniqId,
-            room_password: roomPassword,
+        })
+
+        const roomFindMap = roomFind.map((room) => {
+            return room.room_password
         })
 
         if (roomFind.length > 1) {
@@ -93,9 +98,27 @@ router.post("/room-join", [validationRules[0], validationRules[3]], async (req, 
         if (roomFind.length === 0) {
             return res.status(status.OK).json({
                 success: false,
-                message: `${roomUniqId} has a password or does not exist! Please create new room instead.`,
+                message: `${roomUniqId} does not exist! Please create new room instead.`,
                 data: { room_id: roomUniqId },
             })
+        }
+        if (roomFindMap[0] !== null) {
+            if (roomPassword === null) {
+                return res.status(status.OK).json({
+                    success: false,
+                    message: `${roomUniqId} is password protected!`,
+                    data: { room_id: roomUniqId },
+                })
+            }
+
+            const match = await bcrypt.compareSync(roomPassword, roomFindMap[0])
+            if (!match) {
+                return res.status(status.OK).json({
+                    success: false,
+                    message: `${roomUniqId} incorrect password!`,
+                    data: { room_id: roomUniqId },
+                })
+            }
         }
 
         return res.status(status.OK).json({
