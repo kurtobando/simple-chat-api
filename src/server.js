@@ -1,5 +1,5 @@
 require("dotenv").config()
-
+const { APP_PORT, APP_URL, ORIGIN_URL } = require("./_variables")
 const compression = require("compression")
 const helmet = require("helmet")
 const cors = require("cors")
@@ -8,11 +8,10 @@ const app = express()
 const http = require("http").createServer(app)
 const io = require("socket.io")(http, {
     cors: {
-        origin: ["http://localhost:8000", "http://localhost:3000", "http://localhost"],
+        origin: [ORIGIN_URL],
         methods: ["GET", "POST"],
     },
 })
-const { PORT } = require("./_variables")
 const socketIO = require("./_socket-io")
 const mongoDB = require("./mongodb/mongodb-config")
 
@@ -29,6 +28,6 @@ app.use(require("./routes/index"))
 app.use(require("./routes/authenticate"))
 app.use(require("./routes/room"))
 
-http.listen(PORT, () => {
-    console.log(`[app] can be access via http://localhost:${PORT}`)
+http.listen(APP_PORT, () => {
+    console.log(`[app] can be access via ${APP_URL}:${APP_PORT}`)
 })
