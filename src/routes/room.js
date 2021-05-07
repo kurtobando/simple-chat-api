@@ -135,4 +135,38 @@ router.post("/room-join", [validationRules[0], validationRules[3]], async (req, 
     }
 })
 
+router.get("/room-details/:id", async (req, res) => {
+    try {
+        const roomUniqId = req.params.id || null
+
+        const roomDetails = await RoomSchema.find({
+            room_id: roomUniqId,
+        })
+
+        if (roomDetails.length === 0) {
+            return res.status(status.OK).json({
+                success: false,
+                message: `${roomUniqId} does not exist! Please create new room instead.`,
+                data: { room_id: roomUniqId },
+            })
+        }
+
+        return res.status(status.OK).json({
+            success: true,
+            message: `${roomUniqId} does exist! Welcome user!`,
+            data: {
+                room_id: roomUniqId,
+                room_name: roomDetails[0].room_name,
+                room_description: roomDetails[0].room_description,
+            },
+        })
+    } catch (e) {
+        return res.status(status.BAD_REQUEST).json({
+            success: false,
+            message: ERROR_01,
+            data: { error: e.message },
+        })
+    }
+})
+
 module.exports = router
