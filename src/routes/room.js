@@ -34,7 +34,7 @@ router.post("/room-create", validationRules, async (req, res) => {
         const roomDescription = req.body["room-description"] || null
         const roomPassword = req.body["room-password"] || null
         const roomPasswordHash = roomPassword !== null ? await bcrypt.hash(roomPassword, 10) : roomPassword
-        const isPublic = req.body["room-enable-password"] || false
+        const isPublic = req.body["room-enable-password"] === "false" ? true : false
 
         const roomCreate = new RoomSchema({
             _id: new mongoose.Types.ObjectId(),
