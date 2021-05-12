@@ -1,7 +1,7 @@
 {
   "name": "simple-chat-api",
   "version": "1.0.0",
-  "description": "Simple Chat, made from ReactJS, and socket.io",
+  "description": "A simple chat application powered from GatsbyJS, NodeJS, Mongoose and socket.io ",
   "main": "index.js",
   "scripts": {
     "develop": "nodemon src/server.js"
